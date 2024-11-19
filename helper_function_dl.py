@@ -18,11 +18,11 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
     Behavior:
     - Each subdirectory in the source directory is treated as a class.
     - Files from each class are randomly shuffled and split into training and testing sets.
-    - Training and testing directories are created if they do not exist.
-    - Files are moved (not copied) from the source directory to the train/test directories.
+    - All files are placed directly into the train_dir or test_dir without creating subfolders.
 
     Example:
         split_image_data('dataset', 'dataset/train', 'dataset/test', 0.8)
+
     """
     # Ensure train and test directories exist
     os.makedirs(train_dir, exist_ok=True)
@@ -48,23 +48,18 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
             train_files = files[:split_index]
             test_files = files[split_index:]
             
-            # Make corresponding train and test subfolders
-            train_subfolder = os.path.join(train_dir, subfolder)
-            test_subfolder = os.path.join(test_dir, subfolder)
-            os.makedirs(train_subfolder, exist_ok=True)
-            os.makedirs(test_subfolder, exist_ok=True)
-            
-            # Move files to train and test folders
+            # Move files to train and test folders (directly, no subfolders)
             for file_name in train_files:
-                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(train_subfolder, file_name))
+                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(train_dir, file_name))
             for file_name in test_files:
-                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(test_subfolder, file_name))
+                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(test_dir, file_name))
                 
     print("Data split completed.")
 
 
 def show_random_images(data_dir):
     """
+
     Display random images from up to 5 random classes within a dataset directory.
 
     Parameters:
