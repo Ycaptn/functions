@@ -43,13 +43,22 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio):
 
 
 
+import os
+import random
+from PIL import Image
+import matplotlib.pyplot as plt
+
 def show_random_images(data_dir):
     # Get list of class folders
     class_names = [d for d in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, d))]
 
+    # Limit to a maximum of 5 classes
+    if len(class_names) > 5:
+        class_names = random.sample(class_names, 5)  # Randomly select 5 classes
+
     images = []  # To store images
     titles = []  # To store titles for display
-    
+
     for class_name in class_names:
         class_path = os.path.join(data_dir, class_name)
         
@@ -66,7 +75,7 @@ def show_random_images(data_dir):
 
     # Display all selected images in a horizontal layout
     fig, axes = plt.subplots(1, len(images), figsize=(15, 5))  # Dynamic sizing for the number of images
-    
+
     if len(images) == 1:  # Handle case when there is only one directory
         axes = [axes]
 
@@ -74,7 +83,7 @@ def show_random_images(data_dir):
         ax.imshow(img)
         ax.set_title(title, fontsize=13, pad=10)
         ax.axis('off')  # Hide axes for better visualization
-    
+
     plt.tight_layout()
     plt.show()
 
