@@ -5,8 +5,9 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
-def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
+def split_image_data(source_dir, train_dir, test_dir, train_ratio):
     """
+   
     Splits image data into training and testing datasets based on the given ratio.
 
     Parameters:
@@ -18,12 +19,12 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
     Behavior:
     - Each subdirectory in the source directory is treated as a class.
     - Files from each class are randomly shuffled and split into training and testing sets.
-    - All files are placed directly into the train_dir or test_dir without creating subfolders.
+    - Subfolders for each class are created in the train_dir and test_dir.
 
     Example:
         split_image_data('dataset', 'dataset/train', 'dataset/test', 0.8)
-
-    """
+   
+     """
     # Ensure train and test directories exist
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(test_dir, exist_ok=True)
@@ -48,11 +49,17 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
             train_files = files[:split_index]
             test_files = files[split_index:]
             
-            # Move files to train and test folders (directly, no subfolders)
+            # Create corresponding train and test subfolders
+            train_subfolder = os.path.join(train_dir, subfolder)
+            test_subfolder = os.path.join(test_dir, subfolder)
+            os.makedirs(train_subfolder, exist_ok=True)
+            os.makedirs(test_subfolder, exist_ok=True)
+            
+            # Move files to train and test folders
             for file_name in train_files:
-                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(train_dir, file_name))
+                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(train_subfolder, file_name))
             for file_name in test_files:
-                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(test_dir, file_name))
+                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(test_subfolder, file_name))
                 
     print("Data split completed.")
 
