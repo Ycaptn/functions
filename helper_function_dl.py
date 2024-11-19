@@ -5,12 +5,30 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
-def split_image_data(source_dir, train_dir, test_dir, train_ratio):
+def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
+    """
+    Splits image data into training and testing datasets based on the given ratio.
+
+    Parameters:
+    source_dir (str): Path to the source directory containing subdirectories of images (one subdirectory per class).
+    train_dir (str): Path to the directory where training data will be stored.
+    test_dir (str): Path to the directory where testing data will be stored.
+    train_ratio (float): Ratio of data to be used for training (e.g., 0.8 for 80% training and 20% testing).
+
+    Behavior:
+    - Each subdirectory in the source directory is treated as a class.
+    - Files from each class are randomly shuffled and split into training and testing sets.
+    - Training and testing directories are created if they do not exist.
+    - Files are moved (not copied) from the source directory to the train/test directories.
+
+    Example:
+        split_image_data('dataset', 'dataset/train', 'dataset/test', 0.8)
+    """
     # Ensure train and test directories exist
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(test_dir, exist_ok=True)
 
-    # Get each subfolder in the source directory
+    # Iterate through each subfolder (class)
     for subfolder in os.listdir(source_dir):
         subfolder_path = os.path.join(source_dir, subfolder)
         
@@ -19,6 +37,10 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio):
             # List all files in the subfolder
             files = os.listdir(subfolder_path)
             total_files = len(files)
+            
+            if total_files == 0:
+                print(f"Skipping empty directory: {subfolder_path}")
+                continue
             
             # Shuffle and split files into training and testing sets
             random.shuffle(files)
@@ -41,14 +63,23 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio):
     print("Data split completed.")
 
 
-
-
-import os
-import random
-from PIL import Image
-import matplotlib.pyplot as plt
-
 def show_random_images(data_dir):
+    """
+    Display random images from up to 5 random classes within a dataset directory.
+
+    Parameters:
+    data_dir (str): Path to the dataset directory. Each subdirectory is treated as a class, 
+                    and the function will randomly select one image from up to 5 classes.
+
+    Behavior:
+    - If the dataset contains more than 5 classes, a random subset of 5 classes is selected.
+    - One random image is displayed from each selected class.
+    - The images are displayed in a horizontal layout with their class name and file name as titles.
+
+    Example usage: 
+    show_random_images('path/to/your/dataset')
+
+    """
     # Get list of class folders
     class_names = [d for d in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, d))]
 
@@ -86,8 +117,5 @@ def show_random_images(data_dir):
 
     plt.tight_layout()
     plt.show()
-
-# Example usage:
-# show_random_images('path/to/your/dataset')
 
 
