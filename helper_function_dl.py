@@ -5,6 +5,8 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
+
+
 def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
     """
     Splits image data into training and testing datasets based on the given ratio, retaining the original folder.
@@ -101,6 +103,7 @@ def show_random_images(data_dir):
     plt.show()
 
 
+
 def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".jpeg", ".png", ".gif", ".bmp"}, remove=False):
     """
     Iterates through a directory with class folders, checks if images are in valid formats,
@@ -121,6 +124,7 @@ def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".
 
     for class_folder in os.listdir(base_directory):
         class_folder_path = os.path.join(base_directory, class_folder)
+        
         if os.path.isdir(class_folder_path):
             for file_name in os.listdir(class_folder_path):
                 file_path = os.path.join(class_folder_path, file_name)
@@ -128,20 +132,28 @@ def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".
 
                 if file_extension in valid_extensions:
                     try:
-                        # Check using Pillow
+                        # Open the image with Pillow
                         with Image.open(file_path) as img:
-                            img.verify()  # Verify the image's structure
-                        
-                        # Check using matplotlib
-                        _ = plt.imread(file_path)  # Attempt to load the image's data
+                            # Check if the image format is valid
+                            image_format = img.format.lower()
+                            
+                            if image_format not in [ext.strip(".") for ext in valid_extensions]:
+                                raise ValueError(f"Invalid format: {image_format}")
+
+                            # Verify the image's structure
+                            img.verify()  # This checks the file's integrity
+
+                        # Attempt to load the image using matplotlib (to check if it's a readable image)
+                        _ = plt.imread(file_path)  # If this fails, the image is invalid
+
                     except Exception as e:
-                        # Flag as invalid if either step fails
+                        # Flag the image as invalid if any step fails
                         invalid_images.append((file_name, class_folder))
                         if remove:
                             os.remove(file_path)
                             print(f"Removed invalid image: {file_name} in folder {class_folder} - {e}")
                 else:
-                    # Invalid format, flag directly
+                    # Flag the image as invalid due to format mismatch
                     invalid_images.append((file_name, class_folder))
                     if remove:
                         os.remove(file_path)
