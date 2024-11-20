@@ -5,26 +5,25 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
-def split_image_data(source_dir, train_dir, test_dir, train_ratio):
+def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
     """
-   
-    Splits image data into training and testing datasets based on the given ratio.
+    Splits image data into training and testing datasets based on the given ratio, retaining the original folder.
 
     Parameters:
-    source_dir (str): Path to the source directory containing subdirectories of images (one subdirectory per class).
-    train_dir (str): Path to the directory where training data will be stored.
-    test_dir (str): Path to the directory where testing data will be stored.
-    train_ratio (float): Ratio of data to be used for training (e.g., 0.8 for 80% training and 20% testing).
+    - source_dir (str): Path to the source directory containing subdirectories of images (one subdirectory per class).
+    - train_dir (str): Path to the directory where training data will be stored.
+    - test_dir (str): Path to the directory where testing data will be stored.
+    - train_ratio (float): Ratio of data to be used for training (e.g., 0.8 for 80% training and 20% testing).
 
     Behavior:
     - Each subdirectory in the source directory is treated as a class.
     - Files from each class are randomly shuffled and split into training and testing sets.
     - Subfolders for each class are created in the train_dir and test_dir.
+    - Original files remain intact in the source directory.
 
     Example:
         split_image_data('dataset', 'dataset/train', 'dataset/test', 0.8)
-   
-     """
+    """
     # Ensure train and test directories exist
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(test_dir, exist_ok=True)
@@ -55,13 +54,14 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio):
             os.makedirs(train_subfolder, exist_ok=True)
             os.makedirs(test_subfolder, exist_ok=True)
             
-            # Move files to train and test folders
+            # Copy files to train and test folders
             for file_name in train_files:
-                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(train_subfolder, file_name))
+                shutil.copy(os.path.join(subfolder_path, file_name), os.path.join(train_subfolder, file_name))
             for file_name in test_files:
-                shutil.move(os.path.join(subfolder_path, file_name), os.path.join(test_subfolder, file_name))
+                shutil.copy(os.path.join(subfolder_path, file_name), os.path.join(test_subfolder, file_name))
                 
     print("Data split completed.")
+
 
 
 def show_random_images(data_dir):
@@ -120,4 +120,48 @@ def show_random_images(data_dir):
     plt.tight_layout()
     plt.show()
 
+
+
+def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".jpeg", ".png", ".gif", ".bmp"}, remove=False):
+    """
+    Iterates through a directory with class folders, checks if images are in valid formats,
+    records invalid images, and optionally removes them.
+
+    Args:
+        base_directory (str): Path to the directory containing class folders.
+        valid_extensions (set): Set of valid file extensions (default is common image formats).
+        remove (bool): Whether to remove invalid images (default is False).
+
+    Returns:
+        list: A list of tuples with invalid image names and their respective class folders.
+    """
+    invalid_images = []
+
+    for class_folder in os.listdir(base_directory):
+        class_folder_path = os.path.join(base_directory, class_folder)
+        
+        if os.path.isdir(class_folder_path):  # Ensure it's a directory
+            for file_name in os.listdir(class_folder_path):
+                file_path = os.path.join(class_folder_path, file_name)
+                file_extension = os.path.splitext(file_name)[-1].lower()
+
+                if file_extension in valid_extensions:  # Check if extension is valid
+                    try:
+                        with Image.open(file_path) as img:
+                            img.verify()  # Verify image content
+                    except Exception as e:
+                        # Record invalid image
+                        invalid_images.append((file_name, class_folder))
+                        if remove:
+                            os.remove(file_path)
+                            print(f"Removed corrupted image: {file_name} in folder {class_folder} - {e}")
+                else:
+                    # Record invalid format image
+                    invalid_images.append((file_name, class_folder))
+                    if remove:
+                        os.remove(file_path)
+                        print(f"Removed invalid format image: {file_name} in folder {class_folder}")
+
+    print("Invalid images found:", invalid_images)
+    return invalid_images
 
