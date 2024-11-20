@@ -1,3 +1,8 @@
+import os
+import shutil
+import random
+from PIL import Image
+import matplotlib.pyplot as plt
 
 
 def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
@@ -17,15 +22,7 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
     - Original files remain intact in the source directory.
 
     Example:
-
-    Import Dependencies:
-    import os
-    import shutil
-    import random
-
-    split_image_data('dataset', 'dataset/train', 'dataset/test', 0.8)
-
-
+        split_image_data('dataset', 'dataset/train', 'dataset/test', 0.8)
     """
     os.makedirs(train_dir, exist_ok=True)
     os.makedirs(test_dir, exist_ok=True)
@@ -64,23 +61,15 @@ def show_random_images(data_dir):
 
     Parameters:
     - data_dir (str): Path to the dataset directory. Each subdirectory is treated as a class, 
-                    and the function will randomly select one image from up to 5 classes.
+                      and the function will randomly select one image from up to 5 classes.
 
     Behavior:
     - If the dataset contains more than 5 classes, a random subset of 5 classes is selected.
     - One random image is displayed from each selected class.
     - The images are displayed in a horizontal layout with their class name and file name as titles.
 
-    Example usage: 
-
-    Import Dependencies:
-    import os
-    import random
-    import matplotlib.pyplot as plt
-    from PIL import Image
-
-    show_random_images('path/to/your/dataset')
-
+    Example:
+        show_random_images('path/to/your/dataset')
     """
     class_names = [d for d in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, d))]
 
@@ -126,21 +115,12 @@ def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".
     - list: A list of tuples with invalid image names and their respective class folders.
 
     Example:
-
-    Import Dependencies:
-    import os
-    import shutil
-    from PIL import Image, UnidentifiedImageError
-
-    check_and_remove_invalid_images('dataset', remove=True)
-
-
+        check_and_remove_invalid_images('dataset', remove=True)
     """
     invalid_images = []
 
     for class_folder in os.listdir(base_directory):
         class_folder_path = os.path.join(base_directory, class_folder)
-        
         if os.path.isdir(class_folder_path):
             for file_name in os.listdir(class_folder_path):
                 file_path = os.path.join(class_folder_path, file_name)
@@ -148,9 +128,8 @@ def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".
 
                 if file_extension in valid_extensions:
                     try:
-                        with Image.open(file_path) as img:
-                            img.verify()
-                    except (UnidentifiedImageError, Exception) as e:
+                        plt.imread(file_path)  # Try reading with matplotlib
+                    except Exception as e:
                         invalid_images.append((file_name, class_folder))
                         if remove:
                             os.remove(file_path)
