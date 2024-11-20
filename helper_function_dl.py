@@ -128,13 +128,20 @@ def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".
 
                 if file_extension in valid_extensions:
                     try:
-                        plt.imread(file_path)  # Try reading with matplotlib
+                        # Check using Pillow
+                        with Image.open(file_path) as img:
+                            img.verify()  # Verify the image's structure
+                        
+                        # Check using matplotlib
+                        _ = plt.imread(file_path)  # Attempt to load the image's data
                     except Exception as e:
+                        # Flag as invalid if either step fails
                         invalid_images.append((file_name, class_folder))
                         if remove:
                             os.remove(file_path)
                             print(f"Removed invalid image: {file_name} in folder {class_folder} - {e}")
                 else:
+                    # Invalid format, flag directly
                     invalid_images.append((file_name, class_folder))
                     if remove:
                         os.remove(file_path)
