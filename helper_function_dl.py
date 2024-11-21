@@ -104,7 +104,7 @@ def show_random_images(data_dir):
 
 
 
-def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".jpeg", ".png", ".gif", ".bmp"}, remove=False):
+def checks_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".jpeg", ".png", ".gif", ".bmp"}, remove=False):
     """
     Iterates through a directory with class folders, checks if images are in valid formats,
     records invalid images, and optionally removes them.
@@ -122,6 +122,9 @@ def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".
     """
     invalid_images = []
 
+    # Normalize valid_extensions to lowercase
+    valid_extensions = {ext.lower() for ext in valid_extensions}
+
     for class_folder in os.listdir(base_directory):
         class_folder_path = os.path.join(base_directory, class_folder)
         
@@ -137,14 +140,12 @@ def check_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".
                             # Check if the image format is valid
                             image_format = img.format.lower()
                             
+                    
                             if image_format not in [ext.strip(".") for ext in valid_extensions]:
                                 raise ValueError(f"Invalid format: {image_format}")
 
                             # Verify the image's structure
                             img.verify()  # This checks the file's integrity
-
-                        # Attempt to load the image using matplotlib (to check if it's a readable image)
-                        _ = plt.imread(file_path)  # If this fails, the image is invalid
 
                     except Exception as e:
                         # Flag the image as invalid if any step fails
