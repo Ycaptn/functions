@@ -182,7 +182,7 @@ def build_model(model, excluded_layers=0):
             layer.trainable = False
     else:
         # Freeze the first `excluded_layers`
-        for layer in model.layers[:excluded_layers]:
+        for layer in model.layers[:-excluded_layers]:
             layer.trainable = False
 
     # Recompile the model after freezing layers
