@@ -57,6 +57,11 @@ def split_image_data(source_dir, train_dir, test_dir, train_ratio=0.8):
     print("Data split completed.")
 
 
+import os
+import random
+from PIL import Image
+import matplotlib.pyplot as plt
+
 def show_random_images(data_dir):
     """
     Display random images from up to 5 random classes within a dataset directory.
@@ -66,6 +71,7 @@ def show_random_images(data_dir):
                       and the function will randomly select one image from up to 5 classes.
 
     Behavior:
+    - Ignores `.ipynb_checkpoints` and other non-directory files.
     - If the dataset contains more than 5 classes, a random subset of 5 classes is selected.
     - One random image is displayed from each selected class.
     - The images are displayed in a horizontal layout with their class name and file name as titles.
@@ -73,8 +79,17 @@ def show_random_images(data_dir):
     Example:
         show_random_images('path/to/your/dataset')
     """
-    class_names = [d for d in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, d))]
+    # List all valid class directories (exclude '.ipynb_checkpoints')
+    class_names = [
+        d for d in os.listdir(data_dir)
+        if os.path.isdir(os.path.join(data_dir, d)) and d != '.ipynb_checkpoints'
+    ]
 
+    if not class_names:
+        print("No valid class directories found in the dataset.")
+        return
+
+    # Select up to 5 random classes
     if len(class_names) > 5:
         class_names = random.sample(class_names, 5)
 
@@ -83,12 +98,27 @@ def show_random_images(data_dir):
 
     for class_name in class_names:
         class_path = os.path.join(data_dir, class_name)
-        image_file = random.choice(os.listdir(class_path))
+        # Get all files in the class directory
+        files = os.listdir(class_path)
+        if not files:
+            print(f"Class directory '{class_name}' is empty. Skipping.")
+            continue
+        # Randomly select an image file
+        image_file = random.choice(files)
         image_path = os.path.join(class_path, image_file)
-        image = Image.open(image_path)
-        images.append(image)
-        titles.append(f"Class: {class_name}\nFile: {image_file}")
+        try:
+            image = Image.open(image_path)
+            images.append(image)
+            titles.append(f"Class: {class_name}\nFile: {image_file}")
+        except Exception as e:
+            print(f"Error loading image {image_path}: {e}")
+            continue
 
+    if not images:
+        print("No images found to display.")
+        return
+
+    # Display images in a horizontal layout
     fig, axes = plt.subplots(1, len(images), figsize=(15, 5))
 
     if len(images) == 1:
@@ -101,7 +131,6 @@ def show_random_images(data_dir):
 
     plt.tight_layout()
     plt.show()
-
 
 
 def checks_and_remove_invalid_images(base_directory, valid_extensions={".jpg", ".jpeg", ".png", ".gif", ".bmp"}, remove=False):
@@ -176,18 +205,14 @@ def build_model(model, excluded_layers=0):
     Returns:
     - Modified model with layers frozen as specified.
     """
+   
     if excluded_layers == 0:
         # Freeze all layers
-        for layer in model.layers:
-            layer.trainable = False
+        model.trainable = False
     else:
         # Freeze the first `excluded_layers`
+        model.trainable = True
         for layer in model.layers[:-excluded_layers]:
             layer.trainable = False
 
-    # Recompile the model after freezing layers
-    model.compile(optimizer='adam', 
-                  loss='categorical_crossentropy', 
-                  metrics=['accuracy'])
-    
     return model
