@@ -200,19 +200,19 @@ def build_model(model, excluded_layers=0):
     Parameters:
     - model: Pre-trained model to modify (e.g., a model from TensorFlow/Keras).
     - excluded_layers: Number of initial layers to freeze (non-trainable).
-      If 0, all layers are frozen.
+      If 0, all layers are trainable. If > 0, specified number of layers from the end are trainable. 
 
     Returns:
-    - Modified model with layers frozen as specified.
+    - Modified model with layers frozen/trainable as specified.
     """
-   
-    if excluded_layers == 0:
-        # Freeze all layers
-        model.trainable = False
-    else:
-        # Freeze the first `excluded_layers`
-        model.trainable = True
-        for layer in model.layers[:-excluded_layers]:
-            layer.trainable = False
+
+    # freeze all layers first
+    for layer in model.layers: 
+        layer.trainable = False
+
+    if excluded_layers > 0:
+        # unFreeze the specified layers from the beginning
+        for layer in model.layers[:-excluded_layers]:  # Modified logic here
+            layer.trainable = True
 
     return model
