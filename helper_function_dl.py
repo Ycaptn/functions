@@ -207,8 +207,7 @@ def build_model(model, excluded_layers=0):
     """
 
     # freeze all layers first
-    for layer in model.layers: 
-        layer.trainable = False
+    model.trainable = False
 
     if excluded_layers > 0:
         # unFreeze the specified layers from the beginning
