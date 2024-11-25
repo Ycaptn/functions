@@ -215,3 +215,74 @@ def build_model(model, excluded_layers=0):
           model.layers[i].trainable = True  # Set them to trainable
           
     return model
+
+    import matplotlib.pyplot as plt
+
+def plot_model_comparison(models, history_list, metric='accuracy'):
+    """
+    Plots the specified metric (accuracy or loss) for multiple models.
+
+    Args:
+        models: A list of model names (strings).
+        history_list: A list of model history objects (returned by model.fit).
+        metric: The metric to plot ('accuracy' or 'loss').
+    """
+
+    plt.figure(figsize=(12, 6))  # Adjust figure size as needed
+
+    for i, model_name in enumerate(models):
+        history = history_list[i]
+        
+        if metric == 'accuracy':
+            plt.plot(history.history['accuracy'], label=f'{model_name} Train Accuracy')
+            plt.plot(history.history['val_accuracy'], label=f'{model_name} Validation Accuracy')
+        elif metric == 'loss':
+            plt.plot(history.history['loss'], label=f'{model_name} Train Loss')
+            plt.plot(history.history['val_loss'], label=f'{model_name} Validation Loss')
+
+    plt.title(f'Model Comparison ({metric.capitalize()})')
+    plt.ylabel(metric.capitalize())
+    plt.xlabel('Epoch')
+    plt.legend(loc='best')
+    plt.grid(True)
+    plt.show()
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+from sklearn.metrics import confusion_matrix
+
+def plot_confusion_matrix(model, test_data):
+    """Plots a confusion matrix for the given model and test data.
+
+    Args:
+        model: The trained Keras model.
+        test_data: The test dataset (a `tf.data.Dataset` object).
+    """
+
+    # Get predictions and true labels
+    y_pred_probs = model.predict(test_data)
+    y_pred = np.argmax(y_pred_probs, axis=1)
+
+    y_true = np.concatenate([y for x, y in test_data], axis=0)
+    y_true = np.argmax(y_true, axis=1)
+
+    # Infer class names from the test data
+    num_classes = y_pred_probs.shape[1]
+    class_names = [f"Class {i}" for i in range(num_classes)]
+
+    # Calculate the confusion matrix
+    cm = confusion_matrix(y_true, y_pred)
+
+    # Create a heatmap of the confusion matrix
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+                xticklabels=class_names, yticklabels=class_names)
+
+    # Add labels and title
+    plt.xlabel("Predicted Labels")
+    plt.ylabel("True Labels")
+    plt.title("Confusion Matrix")
+
+    # Show the plot
+    plt.show()
