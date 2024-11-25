@@ -195,23 +195,23 @@ def checks_and_remove_invalid_images(base_directory, valid_extensions={".jpg", "
 
 def build_model(model, excluded_layers=0):
     """
-    Modify a pre-trained model to set the first `excluded_layers` as non-trainable.
+    Modify a pre-trained model to set the specified layers as trainable.
 
     Parameters:
     - model: Pre-trained model to modify (e.g., a model from TensorFlow/Keras).
-    - excluded_layers: Number of initial layers to freeze (non-trainable).
-      If 0, all layers are trainable. If > 0, specified number of layers from the end are trainable. 
+    - excluded_layers: Number of initial layers to set as trainable.
+      If 0, all layers are frozen (non-trainable).
 
     Returns:
     - Modified model with layers frozen/trainable as specified.
     """
-
-    # freeze all layers first
-    model.trainable = False
+    
+    # Freeze all layers initially
+    model.trainable = False  
 
     if excluded_layers > 0:
-        # unFreeze the specified layers from the beginning
-        for layer in model.layers[:-excluded_layers]:  # Modified logic here
-            layer.trainable = True
-
+        # Make the first `excluded_layers` trainable
+        for i in range(excluded_layers):  # Iterate through the desired layers
+          model.layers[i].trainable = True  # Set them to trainable
+          
     return model
