@@ -252,9 +252,9 @@ def plot_model_comparison(models, history_list):
     plt.show()
 
 
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 from sklearn.metrics import confusion_matrix
 
 def plot_confusion_matrix(model, test_data):
@@ -262,19 +262,24 @@ def plot_confusion_matrix(model, test_data):
 
     Args:
         model: The trained Keras model.
-        test_data: The test dataset (a `tf.data.Dataset` object).
+        test_data: The test dataset (a `tf.data.Dataset` or `ImageDataGenerator` object).
     """
 
     # Get predictions and true labels
     y_pred_probs = model.predict(test_data)
     y_pred = np.argmax(y_pred_probs, axis=1)
 
+    # Get true labels
     y_true = np.concatenate([y for x, y in test_data], axis=0)
     y_true = np.argmax(y_true, axis=1)
 
-    # Infer class names from the test data
-    num_classes = y_pred_probs.shape[1]
-    class_names = [f"Class {i}" for i in range(num_classes)]
+    # Get class names from the test_data
+    if hasattr(test_data, 'class_indices'):  # For ImageDataGenerator
+        class_names = list(test_data.class_indices.keys())
+    elif hasattr(test_data, 'label_names'):  # For `image_dataset_from_directory`
+        class_names = test_data.label_names
+    else:
+        raise ValueError("Unable to determine class names. Ensure test_data is created from a directory.")
 
     # Calculate the confusion matrix
     cm = confusion_matrix(y_true, y_pred)
@@ -291,3 +296,4 @@ def plot_confusion_matrix(model, test_data):
 
     # Show the plot
     plt.show()
+
