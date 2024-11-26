@@ -257,7 +257,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 
-def plot_confusion_matrix(model, test_data):
+def plot_confusion_matrix(model, test_data, test_data_dir):
     """Plots a confusion matrix for the given model and test data.
 
     Args:
@@ -274,13 +274,8 @@ def plot_confusion_matrix(model, test_data):
     y_true = np.argmax(y_true, axis=1)
 
     # Get class names from the test_data
-    if hasattr(test_data, 'class_indices'):  # For ImageDataGenerator
-        class_names = list(test_data.class_indices.keys())
-    elif hasattr(test_data, 'label_names'):  # For `image_dataset_from_directory`
-        class_names = test_data.label_names
-    else:
-        raise ValueError("Unable to determine class names. Ensure test_data is created from a directory.")
-
+    class_names = sorted(next(os.walk(test_data_dir))[1])  # List of folder names, sorted alphabetically
+    
     # Calculate the confusion matrix
     cm = confusion_matrix(y_true, y_pred)
 
