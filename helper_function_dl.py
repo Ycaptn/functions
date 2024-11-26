@@ -218,34 +218,39 @@ def build_model(model, excluded_layers=0):
 
     import matplotlib.pyplot as plt
 
-def plot_model_comparison(models, history_list, metric='accuracy'):
+import matplotlib.pyplot as plt
+
+def plot_model_comparison(models, history_list):
     """
-    Plots the specified metric (accuracy or loss) for multiple models.
+    Plots training accuracy, validation accuracy, training loss, and validation loss
+    for multiple models on separate subplots.
 
     Args:
         models: A list of model names (strings).
         history_list: A list of model history objects (returned by model.fit).
-        metric: The metric to plot ('accuracy' or 'loss').
     """
+    # Set up a 2x2 grid for plots
+    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+    axes = axes.ravel()  # Flatten for easy indexing
 
-    plt.figure(figsize=(12, 6))  # Adjust figure size as needed
+    metrics = ['accuracy', 'val_accuracy', 'loss', 'val_loss']
+    titles = ['Training Accuracy', 'Validation Accuracy', 'Training Loss', 'Validation Loss']
 
-    for i, model_name in enumerate(models):
-        history = history_list[i]
+    for i, metric in enumerate(metrics):
+        ax = axes[i]
+        for j, model_name in enumerate(models):
+            history = history_list[j]
+            ax.plot(history.history[metric], label=f'{model_name}')
         
-        if metric == 'accuracy':
-            plt.plot(history.history['accuracy'], label=f'{model_name} Train Accuracy')
-            plt.plot(history.history['val_accuracy'], label=f'{model_name} Validation Accuracy')
-        elif metric == 'loss':
-            plt.plot(history.history['loss'], label=f'{model_name} Train Loss')
-            plt.plot(history.history['val_loss'], label=f'{model_name} Validation Loss')
+        ax.set_title(titles[i])
+        ax.set_xlabel('Epoch')
+        ax.set_ylabel(metric.replace('_', ' ').capitalize())
+        ax.legend(loc='best')
+        ax.grid(True)
 
-    plt.title(f'Model Comparison ({metric.capitalize()})')
-    plt.ylabel(metric.capitalize())
-    plt.xlabel('Epoch')
-    plt.legend(loc='best')
-    plt.grid(True)
+    plt.tight_layout()
     plt.show()
+
 
 import matplotlib.pyplot as plt
 import seaborn as sns
